@@ -1,0 +1,102 @@
+﻿@page "/"
+
+@using CarInventoryDataGrid.Domain
+@using CarInventoryDataGrid.Models
+@using CarInventoryDataGrid.Services
+
+@inject ICarService CarService
+
+@inject DialogService DialogService
+
+@rendermode InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+
+
+<div class="container p-xl-5 p-lg-4 p-md-3 p-sm-2">
+    <h1 class="fw-bold">My Car Inventory</h1>
+    <RadzenButton Click="AddCar">Add Car</RadzenButton>
+    <div class="card p-1 shadow">
+        @if (cars == null)
+        {
+            <h1 class="alert alert-danger">No cars found!</h1>
+        }
+        else
+        {
+            <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true" Data="@cars" TItem="CarEntity" LogicalFilterOperator="LogicalFilterOperator.Or" SelectionMode="DataGridSelectionMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="CarEntity" Property="Make" Filterable="true" Title="Make" TextAlign="TextAlign.Center" />
+                    <RadzenDataGridColumn TItem="CarEntity" Property="Model" Filterable="true" Title="Model" />
+                    <RadzenDataGridColumn TItem="CarEntity" Property="Year" Filterable="true" Title="Year" />
+                    <RadzenDataGridColumn TItem="CarEntity" Property="Price" Filterable="true" Title="Price" />
+                    <RadzenDataGridColumn TItem="CarEntity" Property="Engine" Filterable="true" Title="Engine" />
+                    <RadzenDataGridColumn TItem="CarEntity" Property="Color" Filterable="true" Title="Color" />
+                    <RadzenDataGridColumn TItem="CarEntity" Title="Actions">
+                        <Template Context="data">
+                            <RadzenButton Click="@(args => EditCar(data))">Edit</RadzenButton>
+                            <RadzenButton Click="@(args => DeleteCar(data))">Delete</RadzenButton>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        }
+    </div>
+</div>
+
+
+@code {
+    IEnumerable<CarEntity>? cars;
+
+    protected override async Task OnInitializedAsync()
+    {
+        cars = await GetAllCarsForGrid();
+    }
+
+    private async Task<IEnumerable<CarEntity>> GetAllCarsForGrid()
+    {
+        return await CarService.GetCarEntities();
+    }
+
+    private async void EditCar(CarEntity car)
+    {
+        var parameters = new Dictionary<string, object>() { { "Car", car } };
+        var options = new Radzen.DialogOptions() { Width = "700px", Height = "530px" };
+        var result = await DialogService.OpenAsync<EditCarDialog>("Edit Car", parameters, options);
+        if (result == true)
+        {
+            await RefreshCars();
+        }
+        else
+        {
+            Console.WriteLine($"Failed to update the car with ID: {car.Id}.");
+        }
+    }
+
+    private async void DeleteCar(CarEntity car)
+    {
+        bool? confirmed = await DialogService.Confirm("Are you sure you want to delete this car?", "Delete Car");
+
+        if (confirmed == true)
+        {
+            await CarService.DeleteCarAsync(car.Id);
+            await RefreshCars();
+        }
+    }
+
+    private async void AddCar()
+    {
+        var options = new Radzen.DialogOptions() { Width = "700px", Height = "530px" };
+        var result = await DialogService.OpenAsync<AddCarDialog>("Add Car", null, options);
+        if (result == true)
+        {
+            await RefreshCars();
+        }
+    }
+
+    private async Task RefreshCars()
+    {
+        cars = await GetAllCarsForGrid();
+        StateHasChanged(); // notify blazor UI updates
+    }
+}
