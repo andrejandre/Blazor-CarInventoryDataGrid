@@ -9,3 +9,4 @@ Blazor applications built in this fashion are good candidates for reusable libra
 # Important
 - Right-click on `wwwroot` in VisualStudio and add the bootstrap libraries via `cdnjs`. This will enable the necessary frontend capabilities.
 - Add the necessary nuget packages, which include Radzen.
+- Make sure you utilize **Sql Server Express** and create a Cars database, and a table, which aligns with the `CarEntity` found in the `Domain` folder.
