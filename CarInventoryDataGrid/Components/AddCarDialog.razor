@@ -1,0 +1,60 @@
+﻿@page "/addcar"
+
+@using CarInventoryDataGrid.Domain;
+@using CarInventoryDataGrid.Services;
+
+@inject ICarService CarService
+@inject Radzen.DialogService DialogService
+
+<EditForm Model="@Car">
+    <DataAnnotationsValidator />
+    <ValidationSummary/>
+
+    <div>
+        <label for="make">Make:</label>
+        <InputText id="make" @bind-Value="Car.Make" />
+    </div>
+
+    <div>
+        <label for="model">Model:</label>
+        <InputText id="model" @bind-Value="Car.Model" />
+    </div>
+
+    <div>
+        <label for="year">Year:</label>
+        <InputNumber id="year" @bind-Value="Car.Year" />
+    </div>
+
+    <div>
+        <label for="price">Price:</label>
+        <InputNumber id="price" @bind-Value="Car.Price" />
+    </div>
+
+    <div>
+        <label for="engine">Engine:</label>
+        <InputText id="engine" @bind-Value="Car.Engine" />
+    </div>
+
+    <div>
+        <label for="color">Color:</label>
+        <InputText id="color" @bind-Value="Car.Color" />
+    </div>
+
+    <RadzenButton ButtonType="ButtonType.Button" Click="AddNewCar">Create</RadzenButton>
+    <RadzenButton ButtonType="ButtonType.Button" Click="CloseDialog">Close</RadzenButton>
+</EditForm>
+
+@code {
+    public CarEntity Car { get; set; } = new CarEntity();
+
+    private async Task AddNewCar()
+    {
+        await CarService.CreateCarAsync(Car);
+        DialogService.Close(true);
+    }
+
+    private void CloseDialog()
+    {
+        DialogService.Close(false);
+    }
+}

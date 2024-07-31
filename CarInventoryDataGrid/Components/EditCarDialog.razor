@@ -1,0 +1,73 @@
+﻿@page "/editcar"
+
+@using CarInventoryDataGrid.Domain;
+@using CarInventoryDataGrid.Services;
+
+@inject ICarService CarService
+
+@inject Radzen.DialogService DialogService
+
+<EditForm Model="@CarService" OnValidSubmit="SaveCar" >
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="make">Make:</label>
+        <InputText id="make" @bind-Value="Car.Make" />
+    </div>
+
+    <div>
+        <label for="model">Model:</label>
+        <InputText id="model" @bind-Value="Car.Model" />
+    </div>
+
+    <div>
+        <label for="year">Year:</label>
+        <InputNumber id="year" @bind-Value="Car.Year" />
+    </div>
+
+    <div>
+        <label for="price">Price:</label>
+        <InputNumber id="price" @bind-Value="Car.Price" />
+    </div>
+
+    <div>
+        <label for="engine">Engine:</label>
+        <InputText id="engine" @bind-Value="Car.Engine" />
+    </div>
+
+    <div>
+        <label for="color">Color:</label>
+        <InputText id="color" @bind-Value="Car.Color" />
+    </div>
+
+    <RadzenButton ButtonType="ButtonType.Submit" Icon="save">Save</RadzenButton>
+    <RadzenButton ButtonType="ButtonType.Button" Icon="close" Click="CloseDialog">Cancel</RadzenButton>
+</EditForm>
+
+@code {
+    [Parameter] public CarEntity? Car { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    private async Task SaveCar()
+    {
+        if (Car != null)
+        {
+            try
+            {
+                await CarService.UpdateCarAsync(Car);
+                DialogService.Close(true);
+            }
+            catch (Exception ex)
+            {
+                DialogService.Close(false);
+                Console.WriteLine("Something unexpected happened.");
+            }
+        }
+    }
+
+    private void CloseDialog()
+    {
+        DialogService.Close(false);
+    }
+}
